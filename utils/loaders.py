@@ -77,8 +77,8 @@ class EpicKitchensDataset(data.Dataset, ABC):
         ##################################################################
         clip_size = 16 # fixed width of the clips
         
-        start = record.start_frame()
-        end = record.end_frame()
+        start = record.start_frame
+        end = record.end_frame
         
         frames = []
         
@@ -97,7 +97,7 @@ class EpicKitchensDataset(data.Dataset, ABC):
                     self.num_frames_per_clip[modality]
                 ).round().tolist())
         
-        return np.array(frames)
+        return np.array(frames).flatten()
         #raise NotImplementedError("You should implement _get_train_indices")
 
     def _get_val_indices(self, record, modality):
@@ -109,7 +109,30 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        raise NotImplementedError("You should implement _get_val_indices")
+        clip_size = 16 # fixed width of the clips
+        
+        start = record.start_frame
+        end = record.end_frame
+        
+        frames = []
+        
+        for i in range(self.num_clips):
+            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + start + clip_size/2
+            
+            if self.dense_sampling[modality]:
+                # dense sampling
+                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * (1+self.stride)
+                frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+            else:
+                # uniform sampling
+                frames.append(np.linspace(
+                    clip_center-clip_size/2,   # first frame
+                    clip_center+clip_size/2-1, # last frame
+                    self.num_frames_per_clip[modality]
+                ).round().tolist())
+        
+        return np.array(frames).flatten()
+        #raise NotImplementedError("You should implement _get_train_indices")
 
     def __getitem__(self, index):
 
