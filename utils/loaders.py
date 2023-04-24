@@ -75,7 +75,7 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        clip_size = 16 # fixed width of the clips
+        clip_size = 30 # fixed width of the clips
         
         start = record.start_frame
         end = record.end_frame
@@ -109,7 +109,7 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        clip_size = 16 # fixed width of the clips
+        clip_size = 30 # fixed width of the clips
         
         start = record.start_frame
         end = record.end_frame
