@@ -83,11 +83,11 @@ class EpicKitchensDataset(data.Dataset, ABC):
         frames = []
         
         for i in range(self.num_clips):
-            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + start + clip_size/2
+            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + clip_size/2
             
             if self.dense_sampling[modality]:
                 # dense sampling
-                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * (1+self.stride)
+                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * self.stride
                 frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
             else:
                 # uniform sampling
@@ -117,11 +117,11 @@ class EpicKitchensDataset(data.Dataset, ABC):
         frames = []
         
         for i in range(self.num_clips):
-            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + start + clip_size/2
+            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + clip_size/2
             
             if self.dense_sampling[modality]:
                 # dense sampling
-                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * (1+self.stride)
+                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * self.stride
                 frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
             else:
                 # uniform sampling
