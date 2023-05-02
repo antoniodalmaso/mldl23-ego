@@ -75,20 +75,22 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        clip_size = 30 # fixed width of the clips
-        
-        start = record.start_frame
-        end = record.end_frame
+        clip_size = np.round(record.num_frames['RGB'] / self.num_clips) # sample length / number of desired clips
         
         frames = []
         
         for i in range(self.num_clips):
-            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + clip_size/2
+            clip_center =  np.around(np.random.rand() * (record.num_frames['RGB'] - clip_size)) + clip_size/2
             
             if self.dense_sampling[modality]:
                 # dense sampling
                 first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * self.stride
-                frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+                
+                aux = np.array([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+                aux[aux > record.num_frames['RGB']-1] = record.num_frames['RGB']-1
+                aux[aux < 0] = 0
+                
+                frames.append(aux)
             else:
                 # uniform sampling
                 frames.append(np.linspace(
@@ -109,20 +111,22 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        clip_size = 30 # fixed width of the clips
-        
-        start = record.start_frame
-        end = record.end_frame
+        clip_size = np.round(record.num_frames['RGB'] / self.num_clips) # sample length / number of desired clips
         
         frames = []
         
         for i in range(self.num_clips):
-            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + clip_size/2
+            clip_center =  np.around(np.random.rand() * (record.num_frames['RGB'] - clip_size)) + clip_size/2
             
             if self.dense_sampling[modality]:
                 # dense sampling
                 first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * self.stride
-                frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+                
+                aux = np.array([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+                aux[aux > record.num_frames['RGB']-1] = record.num_frames['RGB']-1
+                aux[aux < 0] = 0
+                
+                frames.append(aux)
             else:
                 # uniform sampling
                 frames.append(np.linspace(
