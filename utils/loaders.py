@@ -75,25 +75,26 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        clip_size = 30 # fixed width of the clips
-        
-        start = record.start_frame
-        end = record.end_frame
+        clip_size = np.round(record.num_frames[modality] / self.num_clips) # sample length / number of desired clips
         
         frames = []
+        centroids = np.linspace(clip_size/2, record.num_frames[modality] - clip_size/2, self.num_clips).round().tolist()
         
-        for i in range(self.num_clips):
-            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + clip_size/2
-            
+        for cen in centroids:
             if self.dense_sampling[modality]:
                 # dense sampling
-                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * self.stride
-                frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+                first = cen - np.around(self.num_frames_per_clip[modality]/2) * self.stride
+                
+                aux = np.array([first+j*self.stride for j in range(self.num_frames_per_clip[modality])])
+                aux[aux > record.num_frames[modality]] = record.num_frames[modality]
+                aux[aux < 0] = 0
+                
+                frames.append(aux)
             else:
                 # uniform sampling
                 frames.append(np.linspace(
-                    clip_center-clip_size/2,   # first frame
-                    clip_center+clip_size/2-1, # last frame
+                    cen-clip_size/2,   # first frame
+                    cen+clip_size/2-1, # last frame
                     self.num_frames_per_clip[modality]
                 ).round().tolist())
         
@@ -109,25 +110,26 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        clip_size = 30 # fixed width of the clips
-        
-        start = record.start_frame
-        end = record.end_frame
+        clip_size = np.round(record.num_frames[modality] / self.num_clips) # sample length / number of desired clips
         
         frames = []
+        centroids = np.linspace(clip_size/2, record.num_frames[modality] - clip_size/2, self.num_clips).round().tolist()
         
-        for i in range(self.num_clips):
-            clip_center =  np.around(np.random.rand() * (end - start - clip_size)) + clip_size/2
-            
+        for cen in centroids:
             if self.dense_sampling[modality]:
                 # dense sampling
-                first = clip_center - np.around(self.num_frames_per_clip[modality]/2) * self.stride
-                frames.append([first+i*self.stride for i in range(self.num_frames_per_clip[modality])])
+                first = cen - np.around(self.num_frames_per_clip[modality]/2) * self.stride
+                
+                aux = np.array([first+j*self.stride for j in range(self.num_frames_per_clip[modality])])
+                aux[aux > record.num_frames[modality]] = record.num_frames[modality]
+                aux[aux < 0] = 0
+                
+                frames.append(aux)
             else:
                 # uniform sampling
                 frames.append(np.linspace(
-                    clip_center-clip_size/2,   # first frame
-                    clip_center+clip_size/2-1, # last frame
+                    cen-clip_size/2,   # first frame
+                    cen+clip_size/2-1, # last frame
                     self.num_frames_per_clip[modality]
                 ).round().tolist())
         
