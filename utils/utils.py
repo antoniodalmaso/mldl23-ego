@@ -1,6 +1,11 @@
 from collections import Mapping
 import torch
+import pickle
 
+def unpickle(file):
+    with open(file, 'rb') as fo:
+        dict = pickle.load(fo, encoding='bytes')
+    return dict
 
 def get_domains_and_labels(args):
     num_verbs = 8

@@ -85,7 +85,7 @@ def save_feat(model, loader, device, it, num_classes):
 
     model.reset_acc()
     model.train(False)
-    results_dict = {"features": []}
+    results_dict = {"features": [], "labels": []}
     num_samples = 0
     logits = {}
     features = {}
@@ -121,6 +121,7 @@ def save_feat(model, loader, device, it, num_classes):
                 for m in modalities:
                     sample["features_" + m] = features[m][:, i].cpu().detach().numpy()
                 results_dict["features"].append(sample)
+                results_dict["labels"].append(label.item())
             num_samples += batch
 
             model.compute_accuracy(logits, label)

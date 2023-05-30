@@ -8,6 +8,26 @@ from PIL import Image
 import os
 import os.path
 from utils.logger import logger
+from utils.utils import unpickle
+
+class I3DFeaturesDataset(data.Dataset):
+    def __init__(self, path, transform=None):
+        dict = unpickle(path)
+        self.data = np.array(list(map(lambda entry: entry["features_RGB"], dict["features"])))
+        self.labels = np.array(dict["labels"])
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.labels);
+  
+    def __getitem__(self, index):
+        record = self.data[index]
+        label = self.labels[index]
+
+        if self.transform is not None:
+            record = self.transform(record)
+
+        return record, label
 
 class EpicKitchensDataset(data.Dataset, ABC):
     def __init__(self, split, modalities, mode, dataset_conf, num_frames_per_clip, num_clips, dense_sampling,
