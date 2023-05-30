@@ -3,19 +3,19 @@ import torch.nn as nn
 import torch.optim as optim
 import torch
 from utils.loaders import I3DFeaturesDataset
-from utils.args import args
+import sys
 import numpy as np
-from models.EpicKitchens import  EpicKitchensLSTM
+from models.EpicKitchens.EpicKitchensLSTM import  EpicKitchensLSTM
+from models.EpicKitchens.EpicKitchensFC import  EpicKitchensFC
 
 np.random.seed(13696641)
 torch.manual_seed(13696641)
 
 def main():
-    path_train = args.path_train
-    path_test = args.path_test
-    learning_rate = args.learning_rate
-    momentum = args.momentum
-    epochs = args.epochs
+    _, path_train, path_test, learning_rate, momentum, epochs = sys.argv
+    learning_rate = float(learning_rate)
+    momentum = float(momentum)
+    epochs = int(epochs)
     
     # DATASETS #
     trainset = I3DFeaturesDataset(path = path_train)
@@ -26,7 +26,8 @@ def main():
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=True, num_workers=2)
 
     # NETWORK #
-    model = EpicKitchensLSTM()
+    model = EpicKitchensLSTM() # LSTM classifier
+    # model = EpicKitchensFC() # Fully connected classifier
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
