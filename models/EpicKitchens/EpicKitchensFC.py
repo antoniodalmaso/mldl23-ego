@@ -11,8 +11,7 @@ class EpicKitchensFC(nn.Module):
         self.fc3 = nn.Linear(384, 256)
         self.fc4 = nn.Linear(256, num_classes)
         self.relu = nn.ReLU()
-        
-        
+
     def forward(self, x):
         fc1 = self.dropout(self.relu(self.fc1(x)))
         fc2 = self.dropout(self.relu(self.fc2(fc1)))

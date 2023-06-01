@@ -2,32 +2,31 @@ import torch.nn.parallel
 import torch.nn as nn
 import torch.optim as optim
 import torch
-from utils.loaders import I3DFeaturesDataset
+from utils.loaders import ActioNetDataset
 import sys
 import numpy as np
-from models.EpicKitchens.EpicKitchensLSTM import  EpicKitchensLSTM
-from models.EpicKitchens.EpicKitchensFC import  EpicKitchensFC
+from torch.utils.data import random_split
+from models.ActioNet.MultiNet import MultiNet
 
 np.random.seed(13696641)
 torch.manual_seed(13696641)
 
 def main():
-    _, path_train, path_test, learning_rate, momentum, epochs = sys.argv
+    _, path_emg, path_rgb, learning_rate, momentum, epochs = sys.argv
     learning_rate = float(learning_rate)
     momentum = float(momentum)
     epochs = int(epochs)
     
     # DATASETS #
-    trainset = I3DFeaturesDataset(path = path_train)
-    testset = I3DFeaturesDataset(path = path_test)
-    
+    dataset = ActioNetDataset(base_data_path=path_emg, rgb_path=path_rgb, num_clips=5, modality="ALL")
+    trainset, testset = random_split(dataset, [0.8, 0.2], generator=torch.Generator().manual_seed(13696641))
+
     # DATA LOADERS #
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=True, num_workers=2)
 
     # NETWORK #
-    model = EpicKitchensLSTM() # LSTM classifier
-    # model = EpicKitchensFC() # Fully connected classifier
+    model = MultiNet() # LSTM classifier
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -45,11 +44,12 @@ def train(model, trainloader, optimizer, loss_function, device, epochs):
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_correct = 0
         running_total = 0
-    
+
         for inputs, labels in trainloader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-        
+            inputs["EMG"].to(device)
+            inputs["RGB"].to(device)
+            labels.to(device)
+            
             # zero the parameter gradients
             optimizer.zero_grad()
 
@@ -67,7 +67,6 @@ def train(model, trainloader, optimizer, loss_function, device, epochs):
         print(f'[epoch {epoch + 1}] accuracy: {100 * running_correct / running_total:.3f}%')
     print('Finished Training!')
 
-
 def validate(model, testloader, device):
     model.eval()
     class_correct = list(0. for i in range(8))
@@ -75,7 +74,8 @@ def validate(model, testloader, device):
 
     with torch.no_grad():
         for (inputs, labels) in testloader:
-            inputs = inputs.to(device)
+            inputs["EMG"].to(device)
+            inputs["RGB"].to(device)
             labels = labels.to(device)
             
             outputs = model(inputs)
