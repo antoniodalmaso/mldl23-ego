@@ -19,7 +19,9 @@ def main():
     
     # DATASETS #
     dataset = ActioNetDataset(base_data_path=path_emg, rgb_path=path_rgb, num_clips=1, modality="EMG")
-    trainset, testset = random_split(dataset, [0.8, 0.2], generator=torch.Generator().manual_seed(13696641))
+    train_size = int(np.round(dataset.__len__() * 0.8))
+    test_size = int(dataset.__len__() - train_size)
+    trainset, testset = random_split(dataset, [train_size, test_size], generator=torch.Generator().manual_seed(13696641))
 
     # DATA LOADERS #
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
@@ -46,8 +48,8 @@ def train(model, trainloader, optimizer, loss_function, device, epochs):
         running_total = 0
 
         for inputs, labels in trainloader:
-            inputs["EMG"].to(device)
-            labels.to(device)
+            inputs["EMG"] = inputs["EMG"].to(device)
+            labels = labels.to(device)
             
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -68,12 +70,12 @@ def train(model, trainloader, optimizer, loss_function, device, epochs):
 
 def validate(model, testloader, device):
     model.eval()
-    class_correct = list(0. for i in range(8))
-    class_total = list(0. for i in range(8))
+    class_correct = list(0. for i in range(21))
+    class_total = list(0. for i in range(21))
 
     with torch.no_grad():
         for (inputs, labels) in testloader:
-            inputs["EMG"].to(device)
+            inputs["EMG"] = inputs["EMG"].to(device)
             labels = labels.to(device)
             
             outputs = model(inputs["EMG"])
@@ -85,10 +87,10 @@ def validate(model, testloader, device):
                 class_correct[label] += c[i].item()
                 class_total[label] += 1
                 
-    for i in range(8):
+    for i in range(21):
         print('Accuracy of %5s : %2d %%' % (
             i, 100 * class_correct[i] / class_total[i]))
-    print(f"Total Acc: {np.sum(class_correct) / np.sum(class_total):.3f}")
+    print(f"Total Acc: {np.sum(class_correct) / np.sum(class_total)*100:.3f}")
 
 
 if __name__ == '__main__':

@@ -36,12 +36,12 @@ class SpecNet(nn.Module):
         
         x = self.conv2(x)
         x = self.hswish2(x)
-        x = self.se1(x) # ?
+        #x = self.se1(x) # ?
         x = self.pool2(x)
         
         x = self.conv3(x)
         x = self.hswish2(x)
-        x = self.se1(x)
+        #x = self.se1(x)
         
         x = self.conv4(x)
         x = self.bn2(x)

@@ -10,6 +10,7 @@ import os.path
 from utils.logger import logger
 from utils.utils import unpickle
 import torch
+import torchaudio.transforms as T
 
 class I3DFeaturesDataset(data.Dataset):
     def __init__(self, path, transform=None):
