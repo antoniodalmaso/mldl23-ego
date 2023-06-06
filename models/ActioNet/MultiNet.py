@@ -1,4 +1,4 @@
-from  SpecNet import SpecNet
+from .SpecNet import SpecNet
 import torch.nn as nn
 import torch
 

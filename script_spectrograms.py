@@ -24,8 +24,8 @@ def main():
     trainset, testset = random_split(dataset, [train_size, test_size], generator=torch.Generator().manual_seed(13696641))
 
     # DATA LOADERS #
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=True, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=2)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=True, num_workers=2)
 
     # NETWORK #
     model = SpecNet(fc1_size = 704) # LSTM classifier
