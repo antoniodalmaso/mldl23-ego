@@ -316,3 +316,87 @@ class ActioNetDataset(data.Dataset):
 
     def __len__(self):
         return len(self.labels)
+    
+class ActionetDataset_2D(Dataset):
+    def __init__(self, base_data_path, rgb_path, num_clips, modality, transform=None):
+        df = unpickle(base_data_path)
+
+        # extracting dataset info
+        self.labels = df['verb_class'].to_numpy()
+        self.EMG = df['emg_matrix'].to_numpy()
+        self.RGB_data = np.array(list(map(lambda entry: entry["features_RGB"], unpickle(rgb_path)["features"])))
+        
+        # additional parameters
+        segment_size = self.EMG[0].shape[0] # n. of measures in a single segment
+        self.clip_starts, self.clip_stops = self.compute_clip_boundaries(segment_size, num_clips)
+        
+        self.modality = modality  # EMG / RGB / ALL
+
+        self.transform = transform  # dizionario con chiavi 'EMG' e 'RGB'
+
+        # initializing spectrogram object
+        n_fft = 32
+        win_length = None
+        hop_length = 4
+
+        self.spectrogram = T.Spectrogram(
+            n_fft=n_fft,
+            win_length=win_length,
+            hop_length=hop_length,
+            center=True,
+            pad_mode="reflect",
+            power=2.0,
+            normalized=True
+        )
+    
+    def __getitem__(self, idx):
+        features_RGB = torch.empty(0)  # I3D features
+        features_EMG = torch.empty(0)  # spectrogram
+        label = self.labels[idx]
+
+        # dividing the data into clips
+        if self.modality == 'RGB' or self.modality == 'ALL':
+            features_RGB = torch.Tensor(self.RGB_data[idx])
+
+        if self.modality == 'EMG' or self.modality == 'ALL':
+            # return EMG spectrogram
+            emg_data = torch.tensor(self.EMG[idx])  # raw EMG samples
+            
+            emg_data = torch.hstack([
+                torch.sum(torch.abs(emg_data[:,:8]), axis=1).view(-1,1),
+                torch.sum(torch.abs(emg_data[:,8:]), axis=1).view(-1,1)
+            ])
+
+            features_EMG = []
+            for clip_start, clip_stop in zip(self.clip_starts, self.clip_stops):
+                features_EMG.append(self.compute_spectrogram(emg_data[clip_start:clip_stop]))
+            features_EMG = torch.Tensor(np.array(features_EMG))
+
+        if self.modality not in ['RGB', 'EMG', 'ALL']:
+            raise Exception(f"Modality '{self.modality}' is not supported.")
+
+        # Applying the transformation (if needed)
+        if self.transform:
+            if self.transform["RGB"]:
+                features_RGB = self.transform["RGB"](features_RGB)
+            if self.transform["EMG"]:
+                features_EMG = self.transform["EMG"](features_EMG)
+
+        return {"RGB": features_RGB, "EMG": features_EMG}, label
+        
+    def compute_clip_boundaries(self, segment_size, n_clips):
+        size = np.around(segment_size / n_clips)
+
+        start_points = np.linspace(0, segment_size - size, n_clips).astype(int)
+        end_points = start_points - 1
+        end_points = np.roll(end_points, -1)
+        end_points[-1] = segment_size - 1
+
+        return start_points, end_points
+
+    def compute_spectrogram(self, signal):
+        freq_signal = np.array([np.array(self.spectrogram(signal[:, i])) for i in range(2)])
+        return freq_signal
+
+    def __len__(self):
+        return len(self.labels)
