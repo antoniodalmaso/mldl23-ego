@@ -33,7 +33,7 @@ def main():
     splits = KFold(5, shuffle=True, random_state=13696641)
     accuracies = []
     for fold, (train_indx, val_indx) in enumerate(splits.split(dataset)):
-      model = SpecNet(fc1_size = 704)
+      model = SpecNet()
 
       print(f'FOLD: {fold}')
       data_train = torch.utils.data.Subset(dataset, train_indx)

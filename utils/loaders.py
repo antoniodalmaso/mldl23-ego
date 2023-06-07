@@ -317,7 +317,7 @@ class ActioNetDataset(data.Dataset):
     def __len__(self):
         return len(self.labels)
     
-class ActionetDataset_2D(Dataset):
+class ActioNetDataset_2D(data.Dataset):
     def __init__(self, base_data_path, rgb_path, num_clips, modality, transform=None):
         df = unpickle(base_data_path)
 
