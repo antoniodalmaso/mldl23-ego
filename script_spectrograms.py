@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from torch.utils.data import random_split
 from models.ActioNet.SpecNet import SpecNet
+from sklearn.model_selection import KFold
 
 np.random.seed(13696641)
 torch.manual_seed(13696641)
@@ -19,27 +20,44 @@ def main():
     
     # DATASETS #
     dataset = ActioNetDataset(base_data_path=path_emg, rgb_path=path_rgb, num_clips=1, modality="EMG")
-    train_size = int(np.round(dataset.__len__() * 0.8))
-    test_size = int(dataset.__len__() - train_size)
-    trainset, testset = random_split(dataset, [train_size, test_size], generator=torch.Generator().manual_seed(13696641))
+    # train_size = int(np.round(dataset.__len__() * 0.8))
+    # test_size = int(dataset.__len__() - train_size)
+    # trainset, testset = random_split(dataset, [train_size, test_size], generator=torch.Generator().manual_seed(13696641))
 
-    # DATA LOADERS #
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=2)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=True, num_workers=2)
+    # # DATA LOADERS #
+    # trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=2)
+    # testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=True, num_workers=2)
+
+
+    ##########################################################################################################
+    splits = KFold(5, shuffle=True, random_state=13696641)
+    accuracies = []
+    for fold, (train_indx, val_indx) in enumerate(splits.split(dataset)):
+      model = SpecNet(fc1_size = 704)
+
+      print(f'FOLD: {fold}')
+      data_train = torch.utils.data.Subset(dataset, train_indx)
+      data_val = torch.utils.data.Subset(dataset, val_indx)
+      
+      trainloader = torch.utils.data.DataLoader(data_train, batch_size=16, shuffle=True, num_workers=2)
+      testloader = torch.utils.data.DataLoader(data_val, batch_size=16, shuffle=True, num_workers=2)
+    ##########################################################################################################
 
     # NETWORK #
-    model = SpecNet(fc1_size = 704) # LSTM classifier
+    # model = SpecNet(fc1_size = 704) # LSTM classifier
 
-    loss_function = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+      loss_function = nn.CrossEntropyLoss()
+      optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
-    # TRAIN #
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model = model.to(device)
-    train(model=model, trainloader=trainloader, optimizer=optimizer, loss_function=loss_function, device=device, epochs=epochs)
+      # TRAIN #
+      device = 'cuda' if torch.cuda.is_available() else 'cpu'
+      model = model.to(device)
+      train(model=model, trainloader=trainloader, optimizer=optimizer, loss_function=loss_function, device=device, epochs=epochs)
 
-    # VALIDATE #
-    validate(model=model, testloader=testloader, device=device)
+      # VALIDATE #
+      accuracies.append(validate(model=model, testloader=testloader, device=device))
+    print(f"Accuracies on the single splits: {np.array(accuracies)*100}")
+    print(f"Average accuracy: {np.mean(accuracies) * 100}")
 
 def train(model, trainloader, optimizer, loss_function, device, epochs):
     model.train()
@@ -91,6 +109,7 @@ def validate(model, testloader, device):
         print('Accuracy of %5s : %2d %%' % (
             i, 100 * class_correct[i] / class_total[i]))
     print(f"Total Acc: {np.sum(class_correct) / np.sum(class_total)*100:.3f}")
+    return np.sum(class_correct) / np.sum(class_total)
 
 
 if __name__ == '__main__':
