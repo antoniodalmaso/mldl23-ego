@@ -6,7 +6,7 @@ class MultiNet(nn.Module):
     def __init__(self):
         super(MultiNet, self).__init__()
         spec = SpecNet(predict=False)
-        spec.load_state_dict(torch.load("/content/mldl23-ego/pretrained_specnet/spec_all_emg.pt"))
+        spec.load_state_dict(torch.load("/content/mldl23-ego/pretrained_specnet/specnet_weights.pt"))
         self.specnet = spec
         # self.lstm_emg = nn.LSTM(input_size=128, hidden_size=128, batch_first=True)
         self.lstm_rgb = nn.LSTM(input_size=1024, hidden_size=1024, batch_first=True)
