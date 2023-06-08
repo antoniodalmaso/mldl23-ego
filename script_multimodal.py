@@ -19,7 +19,7 @@ def main():
     epochs = int(epochs)
     
     # DATASETS #
-    dataset = ActioNetDataset(base_data_path=path_emg, rgb_path=path_rgb, num_clips=1, modality="ALL")
+    dataset = ActioNetDataset(base_data_path=path_emg, rgb_path=path_rgb, num_clips=1, modality="ALL", concatenate=True)
     # train_size = int(np.round(dataset.__len__() * 0.8))
     # test_size = int(dataset.__len__() - train_size)
     # trainset, testset = random_split(dataset, [train_size, test_size], generator=torch.Generator().manual_seed(13696641))

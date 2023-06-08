@@ -48,7 +48,7 @@ class MultiNet(nn.Module):
         
         # EMG
         spec = SpecNet(predict=False)
-        spec.load_state_dict(torch.load("/content/mldl23-ego/pretrained_specnet/specnet_weights.pt"))
+        # spec.load_state_dict(torch.load("/content/mldl23-ego/pretrained_specnet/specnet_weights.pt"))
         self.specnet = spec
 
         # self.lstm_emg = nn.LSTM(input_size=128, hidden_size=128, batch_first=True)
