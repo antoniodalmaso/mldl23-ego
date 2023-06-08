@@ -34,6 +34,7 @@ def main():
     accuracies = []
     for fold, (train_indx, val_indx) in enumerate(splits.split(dataset)):
       model = SpecNet()
+      model.load_state_dict(torch.load("/content/mldl23-ego/pretrained_specnet/specnet_weights_no_SE.pt"))
 
       print(f'FOLD: {fold}')
       data_train = torch.utils.data.Subset(dataset, train_indx)
