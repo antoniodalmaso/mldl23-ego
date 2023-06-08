@@ -8,37 +8,25 @@ class EpicKitchensLSTM(torch.nn.Module):
         self.num_clips = num_clips
         self.num_classes = num_classes
         
-        
         self.lstm = nn.LSTM(input_dim, hidden_dim, batch_first=True)
-        self.linear = nn.Linear(hidden_dim, self.num_classes)
-
-#    def forward(self, input):
-#        output = []
-#        for x in input:
-#            # LSTM
-#            out, hidden = self.lstm(x[0].view(1, 1, -1))
-#            out, hidden = self.lstm(x[1].view(1, 1, -1), hidden)
-#            out, hidden = self.lstm(x[2].view(1, 1, -1), hidden)
-#            out, hidden = self.lstm(x[3].view(1, 1, -1), hidden)
-#            out, _ = self.lstm(x[4].view(1, 1, -1), hidden)
-#
-#            # Fully Connected
-#            out = self.linear(out)
-#
-#            # Soft Max
-#            #out = F.log_softmax(out, dim = -1)
-#            output.append(F.log_softmax(out, dim = -1))
-#        return torch.vstack(output).squeeze()
+        
+        self.dropout = nn.Dropout(0.5)
+        self.fc1 = nn.Linear(hidden_dim, 384)
+        self.fc2 = nn.Linear(384, 256)
+        self.fc3 = nn.Linear(256, num_classes)
+        self.relu = nn.ReLU()
     
     def forward(self, x):
         # LSTM
         out, _ = self.lstm(x)
-        #out = out[:,-1,:] # prendo solo l'ultimo output di ogni sequenza
+        out = out[:,-1,:] # prendo solo l'ultimo output di ogni sequenza
         
         # Fully Connected
-        out = self.linear(out)
+        out = self.dropout(self.relu(self.fc1(out)))
+        out = self.dropout(self.relu(self.fc2(out)))
+        out = self.fc3(out)
         
         # Soft Max
         out = F.log_softmax(out, dim = -1)
-        out = torch.sum(out, dim = 1) # questo serve per "regolarizzare"? (consiglio signor peirone)
+        #out = torch.sum(out, dim = 1) # questo serve per "regolarizzare"? (consiglio signor peirone)
         return out

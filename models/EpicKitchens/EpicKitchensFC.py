@@ -2,8 +2,8 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 class EpicKitchensFC(nn.Module):
-    def _init_(self, num_classes=8):
-        super(EpicKitchensFC, self)._init_()
+    def __init__(self, num_classes=8):
+        super(EpicKitchensFC, self).__init__()
         
         self.dropout = nn.Dropout(0.5)
         self.fc1 = nn.Linear(1024*5, 512)

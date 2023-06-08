@@ -18,12 +18,13 @@ def main():
     epochs = int(epochs)
     
     # DATASETS #
-    trainset = I3DFeaturesDataset(path = path_train)
-    testset = I3DFeaturesDataset(path = path_test)
+    concatenate = (model_type == "linear")
+    trainset = I3DFeaturesDataset(path = path_train, concatenate=concatenate)
+    testset = I3DFeaturesDataset(path = path_test, concatenate=concatenate)
     
     # DATA LOADERS #
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=True, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=2)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=True, num_workers=2)
 
     # NETWORK #
     if model_type == "linear":
@@ -94,7 +95,7 @@ def validate(model, testloader, device):
     for i in range(8):
         print('Accuracy of %5s : %2d %%' % (
             i, 100 * class_correct[i] / class_total[i]))
-    print(f"Total Acc: {np.sum(class_correct) / np.sum(class_total):.3f}")
+    print(f"Total Acc: {np.sum(class_correct) / np.sum(class_total)*100:.3f}")
 
 
 if __name__ == '__main__':

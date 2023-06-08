@@ -13,11 +13,12 @@ import torch
 import torchaudio.transforms as T
 
 class I3DFeaturesDataset(data.Dataset):
-    def __init__(self, path, transform=None):
+    def __init__(self, path, transform=None, concatenate=False):
         dict = unpickle(path)
         self.data = np.array(list(map(lambda entry: entry["features_RGB"], dict["features"])))
         self.labels = np.array(dict["labels"])
         self.transform = transform
+        self.concatenate = concatenate
 
     def __len__(self):
         return len(self.labels);
@@ -25,6 +26,9 @@ class I3DFeaturesDataset(data.Dataset):
     def __getitem__(self, index):
         record = self.data[index]
         label = self.labels[index]
+
+        if self.concatenate:
+          record = np.hstack(record)
 
         if self.transform is not None:
             record = self.transform(record)
