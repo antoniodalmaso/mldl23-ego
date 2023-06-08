@@ -9,9 +9,9 @@ class SpecNet(nn.Module):
         self.conv1 = nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm2d(16)
         self.hswish1 = nn.Hardswish()
-        self.se1 = SqueezeExcitation(16,16, scale_activation=nn.Hardswish)
-        self.se2 = SqueezeExcitation(16,16, scale_activation=nn.Hardswish)
-        self.se3 = SqueezeExcitation(16,16, scale_activation=nn.Hardswish)
+        # self.se1 = SqueezeExcitation(16,16, scale_activation=nn.Hardswish)
+        # self.se2 = SqueezeExcitation(16,16, scale_activation=nn.Hardswish)
+        # self.se3 = SqueezeExcitation(16,16, scale_activation=nn.Hardswish)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=1)
         self.bn2 = nn.BatchNorm2d(32)
@@ -33,20 +33,20 @@ class SpecNet(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.hswish1(x)
-        x1 = self.se1(x)
-        x = x + x1
+        # x1 = self.se1(x)
+        # x = x + x1
         x = self.pool1(x)
         
         x = self.conv2(x)
         x = self.hswish2(x)
-        x2 = self.se2(x) # ?
-        x = x + x2
+        # x2 = self.se2(x) # ?
+        # x = x + x2
         x = self.pool2(x)
         
         x = self.conv3(x)
         x = self.hswish2(x)
-        x3 = self.se3(x)
-        x = x + x3
+        # x3 = self.se3(x)
+        # x = x + x3
 
         x = self.conv4(x)
         x = self.bn2(x)

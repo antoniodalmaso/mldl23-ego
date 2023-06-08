@@ -243,7 +243,7 @@ class EpicKitchensDataset(data.Dataset, ABC):
         return len(self.video_list)
     
 class ActioNetDataset(data.Dataset):
-    def __init__(self, base_data_path, rgb_path, num_clips, modality, transform=None):
+    def __init__(self, base_data_path, rgb_path, num_clips, modality, concatenate=False, transform=None):
         df = unpickle(base_data_path)
 
         # extracting dataset info
@@ -256,6 +256,8 @@ class ActioNetDataset(data.Dataset):
         self.clip_starts, self.clip_stops = self.compute_clip_boundaries(segment_size, num_clips)
         
         self.modality = modality  # EMG / RGB / ALL
+
+        self.concatenate = concatenate
 
         self.transform = transform  # dizionario con chiavi 'EMG' e 'RGB'
 
@@ -281,7 +283,10 @@ class ActioNetDataset(data.Dataset):
 
         # dividing the data into clips
         if self.modality == 'RGB' or self.modality == 'ALL':
-            features_RGB = torch.Tensor(self.RGB_data[idx])
+            aux = self.RGB_data[idx]
+            if self.concatenate:
+                aux = np.hstack(aux)
+            features_RGB = torch.Tensor(aux)
 
         if self.modality == 'EMG' or self.modality == 'ALL':
             # return EMG spectrogram
