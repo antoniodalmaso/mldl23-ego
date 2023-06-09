@@ -32,9 +32,9 @@ def main():
 
     # NETWORK #
     if model_type == "linear":
-        model = EpicKitchensFC() # Fully connected classifier
+        model = EpicKitchensFC(num_classes = 21) # Fully connected classifier
     elif model_type == "LSTM":
-        model = EpicKitchensLSTM() # LSTM classifier
+        model = EpicKitchensLSTM(num_classes = 21) # LSTM classifier
     else: 
         raise Exception(f"Model type '{model_type}' is not supported.")
     
@@ -79,8 +79,8 @@ def train(model, trainloader, optimizer, loss_function, device, epochs):
 
 def validate(model, testloader, device):
     model.eval()
-    class_correct = list(0. for i in range(8))
-    class_total = list(0. for i in range(8))
+    class_correct = list(0. for i in range(21))
+    class_total = list(0. for i in range(21))
 
     with torch.no_grad():
         for (inputs, labels) in testloader:
@@ -96,7 +96,7 @@ def validate(model, testloader, device):
                 class_correct[label] += c[i].item()
                 class_total[label] += 1
                 
-    for i in range(8):
+    for i in range(21):
         print('Accuracy of %5s : %2d %%' % (
             i, 100 * class_correct[i] / class_total[i]))
     print(f"Total Acc: {np.sum(class_correct) / np.sum(class_total)*100:.3f}")
