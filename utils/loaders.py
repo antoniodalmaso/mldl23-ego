@@ -93,14 +93,6 @@ class EpicKitchensDataset(data.Dataset, ABC):
             self.model_features = pd.merge(self.model_features, self.list_file, how="inner", on="uid")
 
     def _get_train_indices(self, record, modality='RGB'):
-        ##################################################################
-        # TODO: implement sampling for training mode                     #
-        # Give the record and the modality, this function should return  #
-        # a list of integers representing the frames to be selected from #
-        # the video clip.                                                #
-        # Remember that the returned array should have size              #
-        #           num_clip x num_frames_per_clip                       #
-        ##################################################################
         clip_size = np.round(record.num_frames[modality] / self.num_clips) # sample length / number of desired clips
         
         frames = []
@@ -125,17 +117,8 @@ class EpicKitchensDataset(data.Dataset, ABC):
                 ).round().tolist())
         
         return np.array(frames).flatten()
-        #raise NotImplementedError("You should implement _get_train_indices")
 
     def _get_val_indices(self, record, modality):
-        ##################################################################
-        # TODO: implement sampling for testing mode                      #
-        # Give the record and the modality, this function should return  #
-        # a list of integers representing the frames to be selected from #
-        # the video clip.                                                #
-        # Remember that the returned array should have size              #
-        #           num_clip x num_frames_per_clip                       #
-        ##################################################################
         clip_size = np.round(record.num_frames[modality] / self.num_clips) # sample length / number of desired clips
         
         frames = []
@@ -160,7 +143,6 @@ class EpicKitchensDataset(data.Dataset, ABC):
                 ).round().tolist())
         
         return np.array(frames).flatten()
-        #raise NotImplementedError("You should implement _get_train_indices")
 
     def __getitem__(self, index):
 
@@ -259,7 +241,7 @@ class ActioNetDataset(data.Dataset):
 
         self.concatenate = concatenate
 
-        self.transform = transform  # dizionario con chiavi 'EMG' e 'RGB'
+        self.transform = transform  # dict with keys 'EMG' e 'RGB'
 
         # initializing spectrogram object
         n_fft = 32
@@ -326,7 +308,7 @@ class ActioNetDataset(data.Dataset):
     def __len__(self):
         return len(self.labels)
     
-class ActioNetDataset_2D(data.Dataset):
+class ActioNetDataset_2Ch(data.Dataset):
     def __init__(self, base_data_path, rgb_path, num_clips, modality, transform=None):
         df = unpickle(base_data_path)
 
@@ -341,7 +323,7 @@ class ActioNetDataset_2D(data.Dataset):
         
         self.modality = modality  # EMG / RGB / ALL
 
-        self.transform = transform  # dizionario con chiavi 'EMG' e 'RGB'
+        self.transform = transform  # dict with keys 'EMG' e 'RGB'
 
         # initializing spectrogram object
         n_fft = 32

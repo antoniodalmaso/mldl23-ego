@@ -20,15 +20,7 @@ def main():
     
     # DATASETS #
     dataset = ActioNetDataset(base_data_path=path_emg, rgb_path=path_rgb, num_clips=1, modality="EMG")
-    # train_size = int(np.round(dataset.__len__() * 0.8))
-    # test_size = int(dataset.__len__() - train_size)
-    # trainset, testset = random_split(dataset, [train_size, test_size], generator=torch.Generator().manual_seed(13696641))
-
-    # # DATA LOADERS #
-    # trainloader = torch.utils.data.DataLoader(trainset, batch_size=16, shuffle=True, num_workers=2)
-    # testloader = torch.utils.data.DataLoader(testset, batch_size=16, shuffle=True, num_workers=2)
-
-
+    
     ##########################################################################################################
     splits = KFold(5, shuffle=True, random_state=13696641)
     accuracies = []
@@ -45,7 +37,6 @@ def main():
     ##########################################################################################################
 
     # NETWORK #
-    # model = SpecNet(fc1_size = 704) # LSTM classifier
 
       loss_function = nn.CrossEntropyLoss()
       optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)

@@ -19,7 +19,7 @@ class EpicKitchensLSTM(torch.nn.Module):
     def forward(self, x):
         # LSTM
         out, _ = self.lstm(x)
-        out = out[:,-1,:] # prendo solo l'ultimo output di ogni sequenza
+        out = out[:,-1,:]
         
         # Fully Connected
         out = self.dropout(self.relu(self.fc1(out)))
@@ -28,5 +28,4 @@ class EpicKitchensLSTM(torch.nn.Module):
         
         # Soft Max
         out = F.log_softmax(out, dim = -1)
-        #out = torch.sum(out, dim = 1) # questo serve per "regolarizzare"? (consiglio signor peirone)
         return out
